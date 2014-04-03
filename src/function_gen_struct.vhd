@@ -103,7 +103,7 @@ architecture Structural of function_gen_struct is
 	
 begin
 	spi: dac_spi port map(SPI_SS_B,AMP_CS,AD_CONV,SF_CE0,FPGA_INIT_B,SPI_MOSI,DAC_CS,SPI_SCK,DAC_CLR,
-								spi_ready,spi_channel,spi_send_data,spi_sine_data,'1',clk);
+								spi_ready,spi_channel,spi_send_data,spi_sine_data,'0',clk);
 								
 	sinelut: ramlut port map(x_sig,spi_sine_data,clk);
 	
