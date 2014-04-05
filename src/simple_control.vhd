@@ -128,7 +128,7 @@ begin
 					end if;
 				end if;
 			end if;
-		end if;	
+		end if;
 	end process;
 	
 	freq_mult <= freq_mult_sig;

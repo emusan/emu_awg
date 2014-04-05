@@ -42,6 +42,10 @@ entity function_gen_struct is
 		SPI_SCK: out std_logic;
 		DAC_CLR: out std_logic;
 		
+		button_in: in std_logic_vector(3 downto 0); -- 0 = down, 1 = up, 2 = left, 3 = right
+		rot_a: in std_logic;
+		rot_b: in std_logic;
+		
 		clk: in std_logic
 	);
 end function_gen_struct;
@@ -71,6 +75,18 @@ architecture Structural of function_gen_struct is
 		);
 	end component;
 	
+	component buttonStructural is
+		port(
+			button_in: in std_logic_vector(3 downto 0); -- 0 = down, 1 = up, 2 = left, 3 = right
+			rot_a: in std_logic;
+			rot_b: in std_logic;
+			button_out: out std_logic_vector(3 downto 0); -- 0 = down, 1 = up, 2 = left, 3 = right
+			direction: out std_logic;
+			pulse: out std_logic;
+			clk: in std_logic
+		);
+	end component;
+	
 	component ramlut is
 		generic(
 			sine_length_bits: integer := 10
@@ -87,10 +103,54 @@ architecture Structural of function_gen_struct is
 			sine_length_bits: integer := 10
 		);
 		port(
-			x_out: out std_logic_vector(sine_length_bits-1 downto 0);
+			-- spi control related
 			spi_ready: in std_logic;
 			spi_send_data: out std_logic;
 			channel: out std_logic_vector(1 downto 0);
+			
+			-- sine wave control related
+			freq_mult: out std_logic_vector(9 downto 0);
+			phase_adjust: out std_logic_vector(9 downto 0);
+			amplitude_adjust: out std_logic_vector(5 downto 0);
+			
+			-- control related
+			current_mode: out std_logic_vector (1 downto 0); -- 00 = freq, 01 = phase, 10 = amplitude
+			button: in std_logic_vector(3 downto 0); -- 0 = down, 1 = up, 2 = left, 3 = right
+			rotary_direction: in std_logic;
+			rotary_pulse: in std_logic;
+			clk: in std_logic
+		);
+	end component;
+	
+	component amplitude_adjust is
+		port(
+			sine_in: in std_logic_vector(11 downto 0);
+			sine_out: out std_logic_vector(11 downto 0);
+			adjust: in std_logic_vector(5 downto 0)
+		);
+	end component;
+	
+	component spi_buffer is
+		port(
+			ch1_in: in std_logic_vector(11 downto 0);
+			--ch2_in: in std_logic_vector(11 downto 0);
+			--ch3_in: in std_logic_vector(11 downto 0);
+			--ch4_in: in std_logic_vector(11 downto 0);
+			spi_sine_out: out std_logic_vector(11 downto 0);
+			spi_ready: in std_logic;
+			channel: in std_logic_vector(1 downto 0);
+			clk: in std_logic
+		);
+	end component;
+	
+	component phase_acc is
+		generic(
+			sine_length_bits: integer := 10
+		);
+		port(
+			x_out: out std_logic_vector(sine_length_bits - 1 downto 0);
+			freq_mult: in std_logic_vector(9 downto 0);
+			phase_in: in std_logic_vector(sine_length_bits - 1 downto 0);
 			clk: in std_logic
 		);
 	end component;
@@ -99,15 +159,58 @@ architecture Structural of function_gen_struct is
 	signal spi_channel: std_logic_vector(1 downto 0);
 	signal spi_send_data: std_logic;
 	signal spi_sine_data: std_logic_vector(11 downto 0);
+	
+	signal amplified_sine: std_logic_vector(11 downto 0);
+	
+	signal raw_sine: std_logic_vector(11 downto 0);
+	signal amp_adjust: std_logic_vector(5 downto 0) := "111111";
+	
 	signal x_sig: std_logic_vector(9 downto 0);
+	signal freq_adjust: std_logic_vector(9 downto 0);
+	signal phase_adjust: std_logic_vector(9 downto 0);
+	
+	signal current_mode: std_logic_vector(1 downto 0);
+	signal button_sig: std_logic_vector(3 downto 0);
+	signal rotary_direction: std_logic;
+	signal rotary_pulse: std_logic;
 	
 begin
 	spi: dac_spi port map(SPI_SS_B,AMP_CS,AD_CONV,SF_CE0,FPGA_INIT_B,SPI_MOSI,DAC_CS,SPI_SCK,DAC_CLR,
 								spi_ready,spi_channel,spi_send_data,spi_sine_data,'0',clk);
 								
-	sinelut: ramlut port map(x_sig,spi_sine_data,clk);
+	phase_accumulator: phase_acc port map(x_sig,freq_adjust,phase_adjust,clk);
+								
+	sinelut: ramlut port map(x_sig,raw_sine,clk);
 	
-	controller: simple_control port map(x_sig,spi_ready,spi_send_data,spi_channel,clk);
+	amplitude: amplitude_adjust port map(raw_sine,amplified_sine,amp_adjust);
+	
+	spi_buffer_thing: spi_buffer port map(amplified_sine,spi_sine_data,spi_ready,spi_channel,clk);
+	
+	controller: simple_control port map(spi_ready,spi_send_data,spi_channel,freq_adjust,phase_adjust,amp_adjust,current_mode,button_sig,rotary_direction,rotary_pulse,clk);
+--			-- spi control related
+--			spi_ready: in std_logic;
+--			spi_send_data: out std_logic;
+--			channel: out std_logic_vector(1 downto 0);
+--			
+--			-- sine wave control related
+--			freq_mult: out std_logic_vector(9 downto 0);
+--			phase_adjust: out std_logic_vector(9 downto 0);
+--			amplitude_adjust: out std_logic_vector(5 downto 0);
+--			
+--			-- control related
+--			current_mode: out std_logic_vector (1 downto 0); -- 00 = freq, 01 = phase, 10 = amplitude
+--			button: in std_logic_vector(3 downto 0); -- 0 = down, 1 = up, 2 = left, 3 = right
+--			rotary_direction: in std_logic;
+--			rotary_pulse: in std_logic;
+--			clk: in std_logic
 
+	controls: buttonStructural port map(button_in,rot_a,rot_b,button_sig,rotary_direction,rotary_pulse,clk);
+--			button_in: in std_logic_vector(3 downto 0); -- 0 = down, 1 = up, 2 = left, 3 = right
+--			rot_a: in std_logic;
+--			rot_b: in std_logic;
+--			button_out: out std_logic_vector(3 downto 0); -- 0 = down, 1 = up, 2 = left, 3 = right
+--			direction: out std_logic;
+--			pulse: out std_logic;
+--			clk: in std_logic
 end Structural;
 
