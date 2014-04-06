@@ -41,7 +41,7 @@ entity simple_control is
 		
 		-- sine wave control related
 		freq_mult: out std_logic_vector(9 downto 0);
-		phase_adjust: out std_logic_vector(9 downto 0);
+		phase_adjust: out std_logic_vector(7 downto 0);
 		amplitude_adjust: out std_logic_vector(5 downto 0);
 		
 		-- control related
@@ -58,8 +58,8 @@ architecture Behavioral of simple_control is
 	signal spi_send_sig: std_logic;
 	
 	signal freq_mult_sig: std_logic_vector(9 downto 0);
-	signal phase_adjust_sig: std_logic_vector(9 downto 0);
-	signal amplitude_adjust_sig: std_logic_vector(5 downto 0);
+	signal phase_adjust_sig: std_logic_vector(7 downto 0);
+	signal amplitude_adjust_sig: std_logic_vector(5 downto 0) := (others => '1');
 	
 	signal current_mode_sig: std_logic_vector(1 downto 0);
 begin
