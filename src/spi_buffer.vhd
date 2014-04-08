@@ -31,7 +31,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity spi_buffer is
 	port(
-		ch1_in: in std_logic_vector(11 downto 0);
+		ch1_sine_in: in std_logic_vector(11 downto 0);
+		ch1_square_in: in std_logic_vector(11 downto 0);
+		ch1_select: in std_logic;
 		--ch2_in: in std_logic_vector(11 downto 0);
 		--ch3_in: in std_logic_vector(11 downto 0);
 		--ch4_in: in std_logic_vector(11 downto 0);
@@ -50,13 +52,23 @@ begin
 	begin
 		if(rising_edge(clk)) then
 			if(spi_ready = '1') then
-				case channel is
-					when "00" => spi_sine_out <= ch1_in;
-					--when "01" => spi_sine_out <= ch2_in;
-					--when "10" => spi_sine_out <= ch3_in;
-					--when "11" => spi_sine_out <= ch4_in;
-					when others => spi_sine_out <= (others => '0');
-				end case;
+				if(ch1_select = '0') then
+					case channel is
+						when "00" => spi_sine_out <= ch1_sine_in;
+						--when "01" => spi_sine_out <= ch2_in;
+						--when "10" => spi_sine_out <= ch3_in;
+						--when "11" => spi_sine_out <= ch4_in;
+						when others => spi_sine_out <= (others => '0');
+					end case;
+				else
+					case channel is
+						when "00" => spi_sine_out <= ch1_square_in;
+						--when "01" => spi_sine_out <= ch2_in;
+						--when "10" => spi_sine_out <= ch3_in;
+						--when "11" => spi_sine_out <= ch4_in;
+						when others => spi_sine_out <= (others => '0');
+					end case;
+				end if;
 			end if;
 		end if;
 	end process;

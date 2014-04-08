@@ -28,7 +28,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- any Xilinx primitives in this code.
 --library UNISIM;
 --use UNISIM.VComponents.all;
-
+ 
 entity function_gen_struct is
 	port(
 		SPI_SS_B: out std_logic;
@@ -45,6 +45,9 @@ entity function_gen_struct is
 		button_in: in std_logic_vector(3 downto 0); -- 0 = down, 1 = up, 2 = left, 3 = right
 		rot_a: in std_logic;
 		rot_b: in std_logic;
+		current_mode: out std_logic_vector(1 downto 0);
+		
+		switch: in std_logic;
 		
 		clk: in std_logic
 	);
@@ -110,8 +113,9 @@ architecture Structural of function_gen_struct is
 			
 			-- sine wave control related
 			freq_mult: out std_logic_vector(9 downto 0);
-			phase_adjust: out std_logic_vector(9 downto 0);
+			phase_adjust: out std_logic_vector(7 downto 0);
 			amplitude_adjust: out std_logic_vector(5 downto 0);
+			pwm_adjust: out std_logic_vector(9 downto 0);
 			
 			-- control related
 			current_mode: out std_logic_vector (1 downto 0); -- 00 = freq, 01 = phase, 10 = amplitude
@@ -132,7 +136,9 @@ architecture Structural of function_gen_struct is
 	
 	component spi_buffer is
 		port(
-			ch1_in: in std_logic_vector(11 downto 0);
+			ch1_sine_in: in std_logic_vector(11 downto 0);
+			ch1_square_in: in std_logic_vector(11 downto 0);
+			ch1_select: in std_logic;
 			--ch2_in: in std_logic_vector(11 downto 0);
 			--ch3_in: in std_logic_vector(11 downto 0);
 			--ch4_in: in std_logic_vector(11 downto 0);
@@ -150,8 +156,19 @@ architecture Structural of function_gen_struct is
 		port(
 			x_out: out std_logic_vector(sine_length_bits - 1 downto 0);
 			freq_mult: in std_logic_vector(9 downto 0);
-			phase_in: in std_logic_vector(sine_length_bits - 1 downto 0);
+			phase_in: in std_logic_vector(7 downto 0);
 			clk: in std_logic
+		);
+	end component;
+	
+	component square_wave is
+		generic(
+		square_wave_length: integer := 10
+		);
+		port(
+		x_in: in std_logic_vector(square_wave_length - 1 downto 0);
+		square_out: out std_logic_vector(11 downto 0);
+		pwm_length: in std_logic_vector(square_wave_length - 1 downto 0)
 		);
 	end component;
 	
@@ -161,15 +178,19 @@ architecture Structural of function_gen_struct is
 	signal spi_sine_data: std_logic_vector(11 downto 0);
 	
 	signal amplified_sine: std_logic_vector(11 downto 0);
+	signal amplified_square: std_logic_vector(11 downto 0);
 	
 	signal raw_sine: std_logic_vector(11 downto 0);
+	signal raw_square: std_logic_vector(11 downto 0);
 	signal amp_adjust: std_logic_vector(5 downto 0) := "111111";
+	
 	
 	signal x_sig: std_logic_vector(9 downto 0);
 	signal freq_adjust: std_logic_vector(9 downto 0);
-	signal phase_adjust: std_logic_vector(9 downto 0);
+	signal phase_adjust: std_logic_vector(7 downto 0);
+	signal pwm_adjust: std_logic_vector(9 downto 0);
 	
-	signal current_mode: std_logic_vector(1 downto 0);
+	--signal current_mode: std_logic_vector(1 downto 0);
 	signal button_sig: std_logic_vector(3 downto 0);
 	signal rotary_direction: std_logic;
 	signal rotary_pulse: std_logic;
@@ -182,18 +203,21 @@ begin
 								
 	sinelut: ramlut port map(x_sig,raw_sine,clk);
 	
-	amplitude: amplitude_adjust port map(raw_sine,amplified_sine,amp_adjust);
+	square: square_wave port map (x_sig,raw_square,pwm_adjust);
 	
-	spi_buffer_thing: spi_buffer port map(amplified_sine,spi_sine_data,spi_ready,spi_channel,clk);
+	ch1_sine_amplitude: amplitude_adjust port map(raw_sine,amplified_sine,amp_adjust);
+	ch1_square_amplitude: amplitude_adjust port map(raw_square,amplified_square,amp_adjust);
 	
-	controller: simple_control port map(spi_ready,spi_send_data,spi_channel,freq_adjust,phase_adjust,amp_adjust,current_mode,button_sig,rotary_direction,rotary_pulse,clk);
+	spi_buffer_thing: spi_buffer port map(amplified_sine,amplified_square,switch,spi_sine_data,spi_ready,spi_channel,clk);
+	
+	controller: simple_control port map(spi_ready,spi_send_data,spi_channel,freq_adjust,phase_adjust,amp_adjust,pwm_adjust,current_mode,button_sig,rotary_direction,rotary_pulse,clk);
 --			-- spi control related
 --			spi_ready: in std_logic;
 --			spi_send_data: out std_logic;
 --			channel: out std_logic_vector(1 downto 0);
 --			
 --			-- sine wave control related
---			freq_mult: out std_logic_vector(9 downto 0);
+--			freq_mult: out std_logic_vector(9 downto 0); 
 --			phase_adjust: out std_logic_vector(9 downto 0);
 --			amplitude_adjust: out std_logic_vector(5 downto 0);
 --			

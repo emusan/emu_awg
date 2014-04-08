@@ -43,6 +43,7 @@ entity simple_control is
 		freq_mult: out std_logic_vector(9 downto 0);
 		phase_adjust: out std_logic_vector(7 downto 0);
 		amplitude_adjust: out std_logic_vector(5 downto 0);
+		pwm_adjust: out std_logic_vector(9 downto 0);
 		
 		-- control related
 		current_mode: out std_logic_vector (1 downto 0); -- 00 = freq, 01 = phase, 10 = amplitude
@@ -60,6 +61,7 @@ architecture Behavioral of simple_control is
 	signal freq_mult_sig: std_logic_vector(9 downto 0);
 	signal phase_adjust_sig: std_logic_vector(7 downto 0);
 	signal amplitude_adjust_sig: std_logic_vector(5 downto 0) := (others => '1');
+	signal pwm_adjust_sig: std_logic_vector(9 downto 0);
 	
 	signal current_mode_sig: std_logic_vector(1 downto 0);
 begin
@@ -127,6 +129,14 @@ begin
 						amplitude_adjust_sig <= std_logic_vector(unsigned(amplitude_adjust_sig) - 1);
 					end if;
 				end if;
+			elsif(current_mode_sig = "11") then
+				if(rotary_pulse = '1') then
+					if(rotary_direction = '1') then
+						pwm_adjust_sig <= std_logic_vector(unsigned(pwm_adjust_sig) + 1);
+					else
+						pwm_adjust_sig <= std_logic_vector(unsigned(pwm_adjust_sig) - 1);
+					end if;
+				end if;
 			end if;
 		end if;
 	end process;
@@ -134,6 +144,7 @@ begin
 	freq_mult <= freq_mult_sig;
 	phase_adjust <= phase_adjust_sig;
 	amplitude_adjust <= amplitude_adjust_sig;
+	pwm_adjust <= pwm_adjust_sig;
 
 end Behavioral;
 
