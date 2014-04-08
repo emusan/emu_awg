@@ -36,14 +36,14 @@ entity phase_acc is
 	port(
 		x_out: out std_logic_vector(sine_length_bits - 1 downto 0);
 		freq_mult: in std_logic_vector(9 downto 0);
-		phase_in: in std_logic_vector(sine_length_bits - 1 downto 0);
+		phase_in: in std_logic_vector(7 downto 0);
 		clk: in std_logic
 	);
 end phase_acc;
 
 architecture Behavioral of phase_acc is
 
-	signal big_ol_counter: unsigned(9 downto 0) := (others => '0');
+	signal big_ol_counter: unsigned(17 downto 0) := (others => '0');
 
 begin
 
@@ -54,7 +54,7 @@ begin
 		end if;
 	end process;
 	
-	x_out <= std_logic_vector(big_ol_counter(9 downto 0) + unsigned(phase_in));
+	x_out <= std_logic_vector(big_ol_counter(17 downto 8) + unsigned(phase_in & "00"));
 
 end Behavioral;
 
