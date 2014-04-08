@@ -31,8 +31,8 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity amplitude_adjust is
 	port(
-		x_in: in std_logic_vector(11 downto 0);
-		x_out: out std_logic_vector(11 downto 0);
+		sine_in: in std_logic_vector(11 downto 0);
+		sine_out: out std_logic_vector(11 downto 0);
 		adjust: in std_logic_vector(5 downto 0)
 	);
 end amplitude_adjust;
@@ -47,14 +47,14 @@ architecture Behavioral of amplitude_adjust is
 	signal six_shift: unsigned(11 downto 0);
 	
 begin
-	one_shift <= unsigned(x_in) srl 1 when adjust(5) = '1' else (others => '0');
-	two_shift <= unsigned(x_in) srl 2 when adjust(4) = '1' else (others => '0');
-	three_shift <= unsigned(x_in) srl 3 when adjust(3) = '1' else (others => '0');
-	four_shift <= unsigned(x_in) srl 4 when adjust(2) = '1' else (others => '0');
-	five_shift <= unsigned(x_in) srl 5 when adjust(1) = '1' else (others => '0');
-	six_shift <= unsigned(x_in) srl 5 when adjust(0) = '1' else (others => '0');
+	one_shift <= unsigned(sine_in) srl 1 when adjust(5) = '1' else (others => '0');
+	two_shift <= unsigned(sine_in) srl 2 when adjust(4) = '1' else (others => '0');
+	three_shift <= unsigned(sine_in) srl 3 when adjust(3) = '1' else (others => '0');
+	four_shift <= unsigned(sine_in) srl 4 when adjust(2) = '1' else (others => '0');
+	five_shift <= unsigned(sine_in) srl 5 when adjust(1) = '1' else (others => '0');
+	six_shift <= unsigned(sine_in) srl 5 when adjust(0) = '1' else (others => '0');
 	
-	x_out <= x_in when adjust = "111111" else
+	sine_out <= sine_in when adjust = "111111" else
 				std_logic_vector(one_shift + two_shift + three_shift + four_shift + five_shift + six_shift);
 	
 end Behavioral;

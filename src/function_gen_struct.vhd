@@ -28,7 +28,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- any Xilinx primitives in this code.
 --library UNISIM;
 --use UNISIM.VComponents.all;
- 
+
 entity function_gen_struct is
 	port(
 		SPI_SS_B: out std_logic;
@@ -45,7 +45,6 @@ entity function_gen_struct is
 		button_in: in std_logic_vector(3 downto 0); -- 0 = down, 1 = up, 2 = left, 3 = right
 		rot_a: in std_logic;
 		rot_b: in std_logic;
-		current_mode: out std_logic_vector(1 downto 0);
 		
 		clk: in std_logic
 	);
@@ -111,7 +110,7 @@ architecture Structural of function_gen_struct is
 			
 			-- sine wave control related
 			freq_mult: out std_logic_vector(9 downto 0);
-			phase_adjust: out std_logic_vector(7 downto 0);
+			phase_adjust: out std_logic_vector(9 downto 0);
 			amplitude_adjust: out std_logic_vector(5 downto 0);
 			
 			-- control related
@@ -151,7 +150,7 @@ architecture Structural of function_gen_struct is
 		port(
 			x_out: out std_logic_vector(sine_length_bits - 1 downto 0);
 			freq_mult: in std_logic_vector(9 downto 0);
-			phase_in: in std_logic_vector(7 downto 0);
+			phase_in: in std_logic_vector(sine_length_bits - 1 downto 0);
 			clk: in std_logic
 		);
 	end component;
@@ -168,9 +167,9 @@ architecture Structural of function_gen_struct is
 	
 	signal x_sig: std_logic_vector(9 downto 0);
 	signal freq_adjust: std_logic_vector(9 downto 0);
-	signal phase_adjust: std_logic_vector(7 downto 0);
+	signal phase_adjust: std_logic_vector(9 downto 0);
 	
-	--signal current_mode: std_logic_vector(1 downto 0);
+	signal current_mode: std_logic_vector(1 downto 0);
 	signal button_sig: std_logic_vector(3 downto 0);
 	signal rotary_direction: std_logic;
 	signal rotary_pulse: std_logic;
@@ -194,7 +193,7 @@ begin
 --			channel: out std_logic_vector(1 downto 0);
 --			
 --			-- sine wave control related
---			freq_mult: out std_logic_vector(9 downto 0); 
+--			freq_mult: out std_logic_vector(9 downto 0);
 --			phase_adjust: out std_logic_vector(9 downto 0);
 --			amplitude_adjust: out std_logic_vector(5 downto 0);
 --			
