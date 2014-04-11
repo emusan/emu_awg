@@ -84,5 +84,37 @@ NET "current_mode[1]" LOC = E12;
 
 # PlanAhead Generated physical constraints 
 
-NET "switch" LOC = L13;
-NET "switch" PULLUP;
+NET "switch[0]" LOC = L13;
+
+# PlanAhead Generated IO constraints 
+
+NET "switch[0]" PULLUP;
+
+# PlanAhead Generated physical constraints 
+
+NET "switch[1]" LOC = L14;
+
+# PlanAhead Generated IO constraints 
+
+NET "switch[1]" PULLUP;
+
+# PlanAhead Generated physical constraints 
+
+NET "switch[2]" LOC = H18;
+
+# PlanAhead Generated IO constraints 
+
+NET "switch[2]" PULLUP;
+
+# PlanAhead Generated physical constraints 
+
+NET "switch[3]" LOC = N17;
+
+# PlanAhead Generated IO constraints 
+
+NET "switch[3]" PULLUP;
+
+# PlanAhead Generated physical constraints 
+
+NET "current_channel[0]" LOC = E9;
+NET "current_channel[1]" LOC = F9;

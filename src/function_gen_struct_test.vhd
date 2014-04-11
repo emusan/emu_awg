@@ -2,7 +2,7 @@
 -- Company: 
 -- Engineer:
 --
--- Create Date:   13:30:13 04/02/2014
+-- Create Date:   00:21:15 04/11/2014
 -- Design Name:   
 -- Module Name:   C:/Users/Tom/projs/code/function_gen_struct/function_gen_struct_test.vhd
 -- Project Name:  function_gen_struct
@@ -50,12 +50,22 @@ ARCHITECTURE behavior OF function_gen_struct_test IS
          DAC_CS : OUT  std_logic;
          SPI_SCK : OUT  std_logic;
          DAC_CLR : OUT  std_logic;
+         button_in : IN  std_logic_vector(3 downto 0);
+         rot_a : IN  std_logic;
+         rot_b : IN  std_logic;
+         current_mode : OUT  std_logic_vector(1 downto 0);
+         current_channel : OUT  std_logic_vector(1 downto 0);
+         switch : IN  std_logic_vector(3 downto 0);
          clk : IN  std_logic
         );
     END COMPONENT;
     
 
    --Inputs
+   signal button_in : std_logic_vector(3 downto 0) := (others => '0');
+   signal rot_a : std_logic := '0';
+   signal rot_b : std_logic := '0';
+   signal switch : std_logic_vector(3 downto 0) := (others => '0');
    signal clk : std_logic := '0';
 
  	--Outputs
@@ -68,6 +78,8 @@ ARCHITECTURE behavior OF function_gen_struct_test IS
    signal DAC_CS : std_logic;
    signal SPI_SCK : std_logic;
    signal DAC_CLR : std_logic;
+   signal current_mode : std_logic_vector(1 downto 0);
+   signal current_channel : std_logic_vector(1 downto 0);
 
    -- Clock period definitions
    constant clk_period : time := 10 ns;
@@ -85,6 +97,12 @@ BEGIN
           DAC_CS => DAC_CS,
           SPI_SCK => SPI_SCK,
           DAC_CLR => DAC_CLR,
+          button_in => button_in,
+          rot_a => rot_a,
+          rot_b => rot_b,
+          current_mode => current_mode,
+          current_channel => current_channel,
+          switch => switch,
           clk => clk
         );
 

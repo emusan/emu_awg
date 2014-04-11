@@ -31,12 +31,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity spi_buffer is
 	port(
-		ch1_sine_in: in std_logic_vector(11 downto 0);
-		ch1_square_in: in std_logic_vector(11 downto 0);
-		ch1_select: in std_logic;
-		--ch2_in: in std_logic_vector(11 downto 0);
-		--ch3_in: in std_logic_vector(11 downto 0);
-		--ch4_in: in std_logic_vector(11 downto 0);
+		sine_in: in std_logic_vector(47 downto 0); -- ch1 (11 downto 0) ch2 (23 downto 12) ch3 (35 downto 24) ch4 (47 downto 36)
+		square_in: in std_logic_vector(47 downto 0); -- ch1 (11 downto 0) ch2 (23 downto 12) ch3 (35 downto 24) ch4 (47 downto 36)
+		ch_select: in std_logic_vector(3 downto 0);
 		spi_sine_out: out std_logic_vector(11 downto 0);
 		spi_ready: in std_logic;
 		channel: in std_logic_vector(1 downto 0);
@@ -52,23 +49,33 @@ begin
 	begin
 		if(rising_edge(clk)) then
 			if(spi_ready = '1') then
-				if(ch1_select = '0') then
-					case channel is
-						when "00" => spi_sine_out <= ch1_sine_in;
-						--when "01" => spi_sine_out <= ch2_in;
-						--when "10" => spi_sine_out <= ch3_in;
-						--when "11" => spi_sine_out <= ch4_in;
-						when others => spi_sine_out <= (others => '0');
-					end case;
-				else
-					case channel is
-						when "00" => spi_sine_out <= ch1_square_in;
-						--when "01" => spi_sine_out <= ch2_in;
-						--when "10" => spi_sine_out <= ch3_in;
-						--when "11" => spi_sine_out <= ch4_in;
-						when others => spi_sine_out <= (others => '0');
-					end case;
-				end if;
+				case channel is
+					when "00" => 
+						if(ch_select(0) = '0') then
+							spi_sine_out <= sine_in(11 downto 0);
+						else 
+							spi_sine_out <= square_in(11 downto 0);
+						end if;
+					when "01" =>
+						if(ch_select(1) = '0') then
+							spi_sine_out <= sine_in(23 downto 12);
+						else 
+							spi_sine_out <= square_in(23 downto 12);
+						end if;
+					when "10" => 
+						if(ch_select(2) = '0') then
+							spi_sine_out <= sine_in(35 downto 24);
+						else 
+							spi_sine_out <= square_in(35 downto 24);
+						end if;
+					when "11" => 
+						if(ch_select(3) = '0') then
+							spi_sine_out <= sine_in(47 downto 36);
+						else 
+							spi_sine_out <= square_in(47 downto 36);
+						end if;
+					when others => spi_sine_out <= (others => '0');
+				end case;
 			end if;
 		end if;
 	end process;
