@@ -43,7 +43,7 @@ end phase_acc;
 
 architecture Behavioral of phase_acc is
 
-	signal big_ol_counter: unsigned(17 downto 0) := (others => '0');
+	signal big_ol_counter: unsigned(20 downto 0) := (others => '0');
 
 begin
 
@@ -54,7 +54,7 @@ begin
 		end if;
 	end process;
 	
-	x_out <= std_logic_vector(big_ol_counter(17 downto 8) + unsigned(phase_in & "00"));
+	x_out <= std_logic_vector(big_ol_counter(20 downto 11) + unsigned(phase_in & "00"));
 
 end Behavioral;
 

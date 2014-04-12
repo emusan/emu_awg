@@ -45,16 +45,39 @@ entity function_gen_struct is
 		button_in: in std_logic_vector(3 downto 0); -- 0 = down, 1 = up, 2 = left, 3 = right
 		rot_a: in std_logic;
 		rot_b: in std_logic;
-		current_mode: out std_logic_vector(1 downto 0);
-		current_channel: out std_logic_vector(1 downto 0);
+		current_mode_out: out std_logic_vector(1 downto 0);
+		current_channel_out: out std_logic_vector(1 downto 0);
 		
 		switch: in std_logic_vector(3 downto 0);
+		
+		lcd_data: out std_logic_vector(3 downto 0);
+		lcd_e: out std_logic;
+		lcd_rw: out std_logic;
+		lcd_rs: out std_logic;
 		
 		clk: in std_logic
 	);
 end function_gen_struct;
 
 architecture Structural of function_gen_struct is
+	component lcd_controller is
+		port(
+			amp_adjust: in std_logic_vector(23 downto 0); -- ch1 (5 downto 0) ch2 (11 downto 6) ch3 (17 downto 12) ch4 (23 downto 18)
+			freq_adjust: in std_logic_vector(39 downto 0); -- ch 1 (9 downto 0) ch2 (19 downto 10) ch3 (29 downto 20) ch4 (39 downto 30)
+			phase_adjust: in std_logic_vector(31 downto 0); -- ch 1 (7 downto 0) ch2 (15 downto 8) ch3 (23 downto 16) ch4 (31 downto 24)
+			pwm_adjust: in std_logic_vector(39 downto 0); -- ch 1 (9 downto 0) ch2 (19 downto 10) ch3 (29 downto 20) ch4 (39 downto 30)
+			
+			current_channel: in std_logic_vector(1 downto 0);
+			current_mode: in std_logic_vector(1 downto 0);
+			
+			lcd_data: out std_logic_vector(3 downto 0);
+			lcd_e: out std_logic;
+			lcd_rw: out std_logic;
+			lcd_rs: out std_logic;
+			
+			clk: in std_logic
+		);
+	end component;
 	component dac_spi is
 		port(
 			--- other devices on SPI BUS ---
@@ -204,12 +227,16 @@ architecture Structural of function_gen_struct is
 	signal phase_adjust: std_logic_vector(31 downto 0); -- ch 1 (7 downto 0) ch2 (15 downto 8) ch3 (23 downto 16) ch4 (31 downto 24)
 	signal pwm_adjust: std_logic_vector(39 downto 0); -- ch 1 (9 downto 0) ch2 (19 downto 10) ch3 (29 downto 20) ch4 (39 downto 30)
 	
-	--signal current_mode: std_logic_vector(1 downto 0);
+	signal current_mode: std_logic_vector(1 downto 0);
+	signal current_channel: std_logic_vector(1 downto 0);
 	signal button_sig: std_logic_vector(3 downto 0);
 	signal rotary_direction: std_logic;
 	signal rotary_pulse: std_logic;
 	
 begin
+	current_mode_out <= current_mode;
+	current_channel_out <= current_channel;
+	
 	spi: dac_spi port map(SPI_SS_B,AMP_CS,AD_CONV,SF_CE0,FPGA_INIT_B,SPI_MOSI,DAC_CS,SPI_SCK,DAC_CLR,
 								spi_ready,spi_channel,spi_send_data,spi_sine_data,'0',clk);
 	spi_buffer_thing: spi_buffer port map(amplified_sine,amplified_square,switch,spi_sine_data,spi_ready,spi_channel,clk);
@@ -289,6 +316,22 @@ begin
 --			button_out: out std_logic_vector(3 downto 0); -- 0 = down, 1 = up, 2 = left, 3 = right
 --			direction: out std_logic;
 --			pulse: out std_logic;
+--			clk: in std_logic
+
+	lcd: lcd_controller port map(amp_adjust,freq_adjust,phase_adjust,pwm_adjust,current_channel,current_mode,lcd_data,lcd_e,lcd_rw,lcd_rs,clk);
+--			amp_adjust: in std_logic_vector(23 downto 0); -- ch1 (5 downto 0) ch2 (11 downto 6) ch3 (17 downto 12) ch4 (23 downto 18)
+--			freq_adjust: in std_logic_vector(39 downto 0); -- ch 1 (9 downto 0) ch2 (19 downto 10) ch3 (29 downto 20) ch4 (39 downto 30)
+--			phase_adjust: in std_logic_vector(31 downto 0); -- ch 1 (7 downto 0) ch2 (15 downto 8) ch3 (23 downto 16) ch4 (31 downto 24)
+--			pwm_adjust: in std_logic_vector(39 downto 0); -- ch 1 (9 downto 0) ch2 (19 downto 10) ch3 (29 downto 20) ch4 (39 downto 30)
+--			
+--			current_channel: in std_logic_vector(1 downto 0);
+--			current_mode: in std_logic_vector(1 downto 0);
+--			
+--			lcd_data: out std_logic_vector(3 downto 0);
+--			lcd_e: out std_logic;
+--			lcd_rw: out std_logic;
+--			lcd_rs: out std_logic;
+--			
 --			clk: in std_logic
 end Structural;
 
