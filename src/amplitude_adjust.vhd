@@ -49,6 +49,7 @@ architecture Behavioral of amplitude_adjust is
 	
 begin
 
+	-- Placed into a process to improve timing
 	process(clk)
 	begin
 		if(rising_edge(clk)) then

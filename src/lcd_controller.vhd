@@ -635,7 +635,7 @@ begin
 				if(delay_btw_sigs_count = "111111111111") then
 					delay_btw_sigs <= '0';
 				end if;
-			elsif(delay_huge <= '1') then
+			elsif(delay_huge = '1') then
 				delay_huge_count <= delay_huge_count + 1;
 				if(delay_huge_count = "111111111111111111") then
 					delay_huge <= '0';
