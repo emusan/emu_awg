@@ -1,0 +1,12 @@
+-update button controller
+	-change rotary control method
+-update LCD controller
+	-less shit
+-update structural
+	-more clean look, generate loops
+-add more generics around
+	-allow for arbitrary number of channels
+
+-add arbitrary waveform generation
+	-interface to PC
+	-dedicated area of RAM

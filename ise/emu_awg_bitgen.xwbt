@@ -1,0 +1,8 @@
+INTSTYLE=ise
+INFILE=/home/tom/progs/fpga/awg/ise/emu_awg.ncd
+OUTFILE=/home/tom/progs/fpga/awg/ise/emu_awg.bit
+FAMILY=Spartan3E
+PART=xc3s500e-4fg320
+WORKINGDIR=/home/tom/progs/fpga/awg/ise
+LICENSE=WebPack
+USER_INFO=210823444_0_0_054

@@ -4,7 +4,7 @@
 -- 
 -- Create Date:    12:55:57 04/02/2014 
 -- Design Name: 
--- Module Name:    function_gen_struct - Structural 
+-- Module Name:    emu_awg - Structural 
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
@@ -29,7 +29,7 @@ use IEEE.NUMERIC_STD.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
  
-entity function_gen_struct is
+entity emu_awg is
 	port(
 		SPI_SS_B: out std_logic;
 		AMP_CS: out std_logic;
@@ -57,9 +57,9 @@ entity function_gen_struct is
 		
 		clk: in std_logic
 	);
-end function_gen_struct;
+end emu_awg;
 
-architecture Structural of function_gen_struct is
+architecture Structural of emu_awg is
 	component lcd_controller is
 		port(
 			amp_adjust: in std_logic_vector(23 downto 0); -- ch1 (5 downto 0) ch2 (11 downto 6) ch3 (17 downto 12) ch4 (23 downto 18)
