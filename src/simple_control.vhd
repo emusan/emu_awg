@@ -51,11 +51,6 @@ architecture Behavioral of simple_control is
 	signal amplitude_array: amplitude_array_t;
 	signal pwm_array: pwm_array_t;
 
-	signal freq_mult_sig: std_logic_vector(9 downto 0);
-	signal phase_adjust_sig: std_logic_vector(7 downto 0);
-	signal amplitude_adjust_sig: std_logic_vector(5 downto 0) := (others => '1');
-	signal pwm_adjust_sig: std_logic_vector(9 downto 0);
-
 begin
 	spi: process(clk)
 	begin

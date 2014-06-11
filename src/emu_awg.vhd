@@ -213,7 +213,6 @@ architecture Structural of emu_awg is
 	
 	signal current_mode: std_logic_vector(1 downto 0);
 	signal current_channel: std_logic_vector(1 downto 0);
-	signal button_sig: std_logic_vector(3 downto 0);
 
 	signal adjust: std_logic_vector(1 downto 0);
 	
