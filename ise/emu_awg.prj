@@ -1,5 +1,6 @@
 vhdl work "../src/rotary_control.vhd"
 vhdl work "../src/pulse_sync.vhd"
+vhdl work "../src/buttons_to_switches.vhd"
 vhdl work "../src/square_wave.vhd"
 vhdl work "../src/spi_buffer.vhd"
 vhdl work "../src/simple_control.vhd"

@@ -104,14 +104,14 @@ architecture Structural of emu_awg is
 	
 	component buttonStructural is
 		port(
-			button_in: in std_logic_vector(3 downto 0); -- 0 = down, 1 = up, 2 = left, 3 = right
-			rot_a: in std_logic;
-			rot_b: in std_logic;
-			button_out: out std_logic_vector(3 downto 0); -- 0 = down, 1 = up, 2 = left, 3 = right
-			direction: out std_logic;
-			pulse: out std_logic;
-			clk: in std_logic
-		);
+					rot_a: in std_logic;
+					rot_b: in std_logic;
+					button_in: in std_logic_vector(3 downto 0);
+					current_mode: out std_logic_vector(1 downto 0);
+					current_channel: out std_logic_vector(1 downto 0);
+					adjust: out std_logic_vector(1 downto 0);
+					clk: in std_logic
+				);
 	end component;
 	
 	component ramlut is
@@ -127,43 +127,27 @@ architecture Structural of emu_awg is
 	
 	component simple_control is
 		generic(
-			sine_length_bits: integer := 10
-		);
+						 sine_length_bits: integer := 10;
+						 num_channels: integer := 4
+					 );
 		port(
-			-- spi control related
-			spi_ready: in std_logic;
-			spi_send_data: out std_logic;
-			spi_channel: out std_logic_vector(1 downto 0);
-			
-			-- sine wave control related
-			ch1_freq_mult: out std_logic_vector(9 downto 0);
-			ch1_phase_adjust: out std_logic_vector(7 downto 0);
-			ch1_amplitude_adjust: out std_logic_vector(5 downto 0);
-			ch1_pwm_adjust: out std_logic_vector(9 downto 0);
-			--ch2
-			ch2_freq_mult: out std_logic_vector(9 downto 0);
-			ch2_phase_adjust: out std_logic_vector(7 downto 0);
-			ch2_amplitude_adjust: out std_logic_vector(5 downto 0);
-			ch2_pwm_adjust: out std_logic_vector(9 downto 0);
-			--ch3
-			ch3_freq_mult: out std_logic_vector(9 downto 0);
-			ch3_phase_adjust: out std_logic_vector(7 downto 0);
-			ch3_amplitude_adjust: out std_logic_vector(5 downto 0);
-			ch3_pwm_adjust: out std_logic_vector(9 downto 0);
-			--ch4
-			ch4_freq_mult: out std_logic_vector(9 downto 0);
-			ch4_phase_adjust: out std_logic_vector(7 downto 0);
-			ch4_amplitude_adjust: out std_logic_vector(5 downto 0);
-			ch4_pwm_adjust: out std_logic_vector(9 downto 0);
-			
-			-- control related
-			current_mode: out std_logic_vector (1 downto 0); -- 00 = freq, 01 = phase, 10 = amplitude
-			current_channel: out std_logic_vector(1 downto 0);
-			button: in std_logic_vector(3 downto 0); -- 0 = down, 1 = up, 2 = left, 3 = right
-			rotary_direction: in std_logic;
-			rotary_pulse: in std_logic;
-			clk: in std_logic
-		);
+					-- spi control related
+					spi_ready: in std_logic;
+					spi_send_data: out std_logic;
+					spi_channel: out std_logic_vector(1 downto 0);
+
+					-- sine wave control related
+					freq_mult: out std_logic_vector((num_channels * 10) - 1 downto 0);
+					phase_adjust: out std_logic_vector((num_channels * 8) - 1 downto 0);
+					amplitude_adjust: out std_logic_vector((num_channels * 6) - 1 downto 0);
+					pwm_adjust: out std_logic_vector((num_channels * 10) - 1 downto 0);
+
+					-- control related
+					current_mode: in std_logic_vector (1 downto 0); -- 00 = freq, 01 = phase, 10 = amplitude
+					current_channel: in std_logic_vector(1 downto 0);
+					adjust: in std_logic_vector(1 downto 0); -- pulses for adjustment of values, 0 up, 1 down
+					clk: in std_logic
+				);
 	end component;
 	
 	component amplitude_adjust is
@@ -229,9 +213,8 @@ architecture Structural of emu_awg is
 	
 	signal current_mode: std_logic_vector(1 downto 0);
 	signal current_channel: std_logic_vector(1 downto 0);
-	signal button_sig: std_logic_vector(3 downto 0);
-	signal rotary_direction: std_logic;
-	signal rotary_pulse: std_logic;
+
+	signal adjust: std_logic_vector(1 downto 0);
 	
 begin
 	current_mode_out <= current_mode;
@@ -270,46 +253,32 @@ begin
 	
 	
 	controller: simple_control port map(spi_ready,spi_send_data,spi_channel,
-													freq_adjust(9 downto 0),phase_adjust(7 downto 0),amp_adjust(5 downto 0),pwm_adjust(9 downto 0),
-													freq_adjust(19 downto 10),phase_adjust(15 downto 8),amp_adjust(11 downto 6),pwm_adjust(19 downto 10),
-													freq_adjust(29 downto 20),phase_adjust(23 downto 16),amp_adjust(17 downto 12),pwm_adjust(29 downto 20),
-													freq_adjust(39 downto 30),phase_adjust(31 downto 24),amp_adjust(23 downto 18),pwm_adjust(39 downto 30),
-													current_mode,current_channel,button_sig,rotary_direction,rotary_pulse,clk);
--- spi control related
---			spi_ready: in std_logic;
---			spi_send_data: out std_logic;
---			spi_channel: out std_logic_vector(1 downto 0);
---			
---			-- sine wave control related
---			ch1_freq_mult: out std_logic_vector(9 downto 0);
---			ch1_phase_adjust: out std_logic_vector(7 downto 0);
---			ch1_amplitude_adjust: out std_logic_vector(5 downto 0);
---			ch1_pwm_adjust: out std_logic_vector(9 downto 0);
---			--ch2
---			ch2_freq_mult: out std_logic_vector(9 downto 0);
---			ch2_phase_adjust: out std_logic_vector(7 downto 0);
---			ch2_amplitude_adjust: out std_logic_vector(5 downto 0);
---			ch2_pwm_adjust: out std_logic_vector(9 downto 0);
---			--ch3
---			ch3_freq_mult: out std_logic_vector(9 downto 0);
---			ch3_phase_adjust: out std_logic_vector(7 downto 0);
---			ch3_amplitude_adjust: out std_logic_vector(5 downto 0);
---			ch3_pwm_adjust: out std_logic_vector(9 downto 0);
---			--ch4
---			ch4_freq_mult: out std_logic_vector(9 downto 0);
---			ch4_phase_adjust: out std_logic_vector(7 downto 0);
---			ch4_amplitude_adjust: out std_logic_vector(5 downto 0);
---			ch4_pwm_adjust: out std_logic_vector(9 downto 0);
---			
---			-- control related
---			current_mode: out std_logic_vector (1 downto 0); -- 00 = freq, 01 = phase, 10 = amplitude
---			current_channel: out std_logic_vector(1 downto 0);
---			button: in std_logic_vector(3 downto 0); -- 0 = down, 1 = up, 2 = left, 3 = right
---			rotary_direction: in std_logic;
---			rotary_pulse: in std_logic;
---			clk: in std_logic
+	                        freq_adjust,phase_adjust,amp_adjust,pwm_adjust,
+													current_mode,current_channel,adjust,clk);
+	--generic(
+	--				 sine_length_bits: integer := 10;
+	--				 num_channels: integer := 4
+	--			 );
+	--port(
+	--			-- spi control related
+	--			spi_ready: in std_logic;
+	--			spi_send_data: out std_logic;
+	--			spi_channel: out std_logic_vector(1 downto 0);
 
-	controls: buttonStructural port map(button_in,rot_a,rot_b,button_sig,rotary_direction,rotary_pulse,clk);
+	--			-- sine wave control related
+	--			freq_mult: out std_logic_vector((num_channels * 10) - 1 downto 0);
+	--			phase_adjust: out std_logic_vector((num_channels * 8) - 1 downto 0);
+	--			amplitude_adjust: out std_logic_vector((num_channels * 6) - 1 downto 0);
+	--			pwm_adjust: out std_logic_vector((num_channels * 10) - 1 downto 0);
+
+	--			-- control related
+	--			current_mode: in std_logic_vector (1 downto 0); -- 00 = freq, 01 = phase, 10 = amplitude
+	--			current_channel: in std_logic_vector(1 downto 0);
+	--			adjust: in std_logic_vector(1 downto 0) -- pulses for adjustment of values, 0 up, 1 down
+	--			clk: in std_logic
+	--		);
+
+	controls: buttonStructural port map(rot_a,rot_b,button_in,current_mode,current_channel,adjust,clk);
 --			button_in: in std_logic_vector(3 downto 0); -- 0 = down, 1 = up, 2 = left, 3 = right
 --			rot_a: in std_logic;
 --			rot_b: in std_logic;
