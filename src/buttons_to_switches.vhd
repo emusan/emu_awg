@@ -23,6 +23,7 @@ begin
 	rotary_handle: process(clk)
 	begin
 		if(rising_edge(clk)) then
+			adjust <= "00";
 			if(rotary_pulse = '1' and rotary_direction = '1') then
 				adjust <= "01";
 			elsif (rotary_pulse = '1') then
