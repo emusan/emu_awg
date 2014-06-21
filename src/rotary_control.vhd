@@ -36,10 +36,8 @@ begin
 					state <= ablow;
 				end if;
 			when abhigh =>
-				if(rotary_input = "10") then
-					state <= left;
-				elsif(rotary_input = "01") then
-					state <= right; -- maybe left, untested
+				if(rotary_input = "00") then
+					state <= ablow;
 				else
 					state <= abhigh;
 				end if;
